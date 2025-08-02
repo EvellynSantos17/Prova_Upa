@@ -10,11 +10,13 @@ class ExampleTest extends TestCase
     /**
      * A basic test example.
      */
-    public function test_api_returns_itens_successfully(): void
+    public function test_the_application_root_returns_api_message(): void
     {
-        $response = $this->get('/api/itens');
+        $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertJsonStructure(['itens']); // se a resposta for do tipo ['itens' => [...]]
-    }
+        $response->assertJson([
+            'message' => 'API Laravel',
+        ]);
+}
 }
