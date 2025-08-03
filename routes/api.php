@@ -3,6 +3,8 @@
 use App\Http\Controllers\API\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\SetorController;
+
 
 
 Route::prefix('v1')->group(function () {
@@ -21,4 +23,5 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/create/itens', [ItemController::class, 'store']);
 
+    Route::get('/setores', [SetorController::class, 'index']);
 });
