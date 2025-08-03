@@ -13,4 +13,9 @@ class Itens extends Model
 
     protected $fillable = ['nome', 'descricao', 'codigo'];
 
+    public function estoque()
+    {
+        return $this->hasMany(Itens::class);
+    }
+
 }
