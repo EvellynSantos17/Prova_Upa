@@ -38,6 +38,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'setor_id',
     ];
 
     /**
@@ -63,4 +64,13 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /*
+      * Get the setor that the user belongs to.
+    */
+    public function setor()
+    {
+        return $this->belongsTo(Setor::class);
+    }
+
 }
