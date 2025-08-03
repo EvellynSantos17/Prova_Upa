@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\API\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ItemController;
+
 
 Route::prefix('v1')->group(function () {
     // Auth API Routes
@@ -16,4 +18,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/register', [AuthController::class, 'register']);
     });
+
+    Route::post('/create/itens', [ItemController::class, 'store']);
+
 });
