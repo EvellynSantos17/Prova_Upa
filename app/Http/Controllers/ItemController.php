@@ -13,6 +13,12 @@ class ItemController extends Controller
      public function __construct(Itens $itens){
         $this->itens = $itens;
      }
+
+    /*
+        * Store a newly created item in storage.
+        * @param  \App\Http\Requests\ItensRequest  $request
+        * @return \Illuminate\Http\JsonResponse
+    */
     public function store(ItensRequest $request)
     {
        try{
