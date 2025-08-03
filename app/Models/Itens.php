@@ -15,7 +15,8 @@ class Itens extends Model
 
     public function estoque()
     {
-        return $this->hasMany(Itens::class);
+        return $this->hasOne(Estoque::class, 'item_id');
     }
+
 
 }
