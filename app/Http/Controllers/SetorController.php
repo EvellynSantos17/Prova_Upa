@@ -8,6 +8,10 @@ class SetorController extends Controller
 {
     protected $setor;
 
+    /**
+         * SetorController constructor.
+         * @param Setor $setor
+     */
     public function __construct(Setor $setor)
     {
         $this->setor = $setor;
