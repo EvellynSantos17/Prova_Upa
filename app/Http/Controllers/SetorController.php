@@ -12,6 +12,11 @@ class SetorController extends Controller
     {
         $this->setor = $setor;
     }
+
+    /*
+        * Display a listing of the setores.
+        * @return \Illuminate\Http\JsonResponse
+    */
     public function index()
     {
         $setores = $this->setor->get();
