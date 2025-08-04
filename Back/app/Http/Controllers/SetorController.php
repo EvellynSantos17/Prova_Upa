@@ -13,7 +13,7 @@ class SetorController extends Controller
         $this->setor = $setor;
     }
 
-    public function index():
+    public function index()
     {
         $setores = $this->setor
             ->orderBy('nome')
