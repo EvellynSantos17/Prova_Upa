@@ -215,9 +215,8 @@ class AuthController extends Controller
     {
         try {
             /** @var array<string, string> $data */
-            $data = $request->only('name', 'email', 'password');
+            $data = $request->only('name', 'email', 'password', 'setor_id');
 
-            // Create the user
             /** @var string|null $token */
             $token = $this->authService->register($data);
 

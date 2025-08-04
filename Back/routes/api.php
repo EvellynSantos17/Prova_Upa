@@ -8,20 +8,20 @@ use App\Http\Controllers\SetorController;
 
 
 Route::prefix('v1')->group(function () {
-    // Auth API Routes
-    Route::middleware(['auth:sanctum'])->group(static function (): void {
-        Route::get('/user', [AuthController::class, 'user']);
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::post('/refresh', [AuthController::class, 'refresh']);
-    });
-
-    // Non Auth API Routes
-    Route::middleware(['guest:sanctum'])->group(static function (): void {
-        Route::post('/login', [AuthController::class, 'login']);
+    // Não proteger /setores com nenhum middleware:
+    Route::get('/setores', [SetorController::class, 'index']);
+    
+    // Endpoints que requerem usuário não autenticado:
+    Route::middleware(['guest:sanctum'])->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login',    [AuthController::class, 'login']);
+    });
+    
+    // Endpoints que requerem autenticação:
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('/user',    [AuthController::class, 'user']);
+        Route::post('/logout', [AuthController::class, 'logout']);
     });
 
     Route::post('/create/itens', [ItemController::class, 'store']);
-
-    Route::get('/setores', [SetorController::class, 'index']);
 });

@@ -28,11 +28,28 @@
 
 <script setup>
 import { ref } from 'vue'
+import api from './axios'
+import { useRouter } from 'vue-router'
 
 const email = ref('')
 const senha = ref('')
+const router = useRouter()
 
-function fazerLogin() {
-  alert(`Login com: ${email.value}`)
+async function fazerLogin() {
+  try {
+    const response = await api.post('/login', {
+      email: email.value,
+      password: senha.value
+    })
+
+    // opcional: salvar token, se estiver retornando um
+    // localStorage.setItem('token', response.data.token)
+
+    alert('Login realizado com sucesso!')
+    router.push('/') // redirecionar para página principal
+  } catch (error) {
+    alert('Erro ao logar: ' + (error.response?.data?.message || error.message))
+  }
 }
 </script>
+

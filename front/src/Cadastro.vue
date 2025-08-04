@@ -8,13 +8,30 @@
           <label class="block text-gray-700 mb-1">Nome</label>
           <input v-model="nome" type="text" class="w-full border rounded p-2" required />
         </div>
+
         <div>
           <label class="block text-gray-700 mb-1">E-mail</label>
           <input v-model="email" type="email" class="w-full border rounded p-2" required />
         </div>
+
         <div>
           <label class="block text-gray-700 mb-1">Senha</label>
           <input v-model="senha" type="password" class="w-full border rounded p-2" required />
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Confirmar Senha</label>
+          <input v-model="confirmarSenha" type="password" class="w-full border rounded p-2" required />
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Setor</label>
+          <select v-model="setorId" class="w-full border rounded p-2" required>
+            <option value="">Selecione um setor</option>
+            <option v-for="setor in setores" :key="setor.id" :value="setor.id">
+              {{ setor.nome }}
+            </option>
+          </select>
         </div>
 
         <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded">
@@ -31,13 +48,43 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import api from './axios';
 
-const nome = ref('')
-const email = ref('')
-const senha = ref('')
+const router = useRouter();
+const setores = ref([]);
+const nome = ref('');
+const email = ref('');
+const senha = ref('');
+const confirmarSenha = ref('');
+const setorId = ref('');
 
-function cadastrar() {
-  alert(`Cadastro feito para: ${nome.value}`)
+onMounted(async () => {
+  try {
+    const resp = await api.get('/setores');
+    setores.value = resp.data;
+  } catch (e) {
+    console.error(e);
+    alert('Falha ao carregar setores');
+  }
+});
+
+async function cadastrar() {
+  try {
+    await api.get('/sanctum/csrf-cookie');
+    await api.post('/register', {
+      name: nome.value,
+      email: email.value,
+      password: senha.value,
+      password_confirmation: confirmarSenha.value,
+      setor_id: setorId.value
+    });
+    router.push('/login');
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    alert('Erro: ' + (err.response?.data?.message || err.response?.data?.error || err.message));
+  }
 }
 </script>
+
