@@ -31,7 +31,7 @@ class UserRegisterRequest extends FormRequest
                 'confirmed',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/',
             ],
-            'setor_id' => 'nullable|integer',
+            'setor_id' => 'integer',
 
         ];
     }
