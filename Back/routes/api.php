@@ -8,7 +8,6 @@ use App\Http\Controllers\SetorController;
 
 
 Route::prefix('v1')->group(function () {
-    // Não proteger /setores com nenhum middleware:
     Route::get('/setores', [SetorController::class, 'index']);
     
     // Endpoints que requerem usuário não autenticado:
