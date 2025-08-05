@@ -19,7 +19,7 @@
 
       <main class="max-w-4xl mx-auto px-4 divide-y divide-gray-200">
         <!-- Modal -->
-        <Modal :visible="showModal" @close="cancelar">
+        <Modal ref="modal" @close="cancelar">
           <h2 class="text-2xl font-medium mb-4">
             {{ isEdit ? "Editar Item" : "Novo Item" }}
           </h2>
@@ -130,8 +130,8 @@ import axios from "axios";
 import SidebarMenu from "./components/SidebarMenu.vue";
 import Modal from "./components/Modal.vue";
 
+const modal = ref(null);
 const itens = ref([]);
-const showModal = ref(false);
 const editingId = ref(null);
 
 const form = reactive({
@@ -168,15 +168,14 @@ async function loadItens() {
 }
 
 function startNew() {
-  console.log("showModal:", showModal.value); // 👈 TESTE
   editingId.value = null;
   form.codigo = "";
   form.nome = "";
-  showModal.value = true;
+  modal.value.show();
 }
 
 function cancelar() {
-  showModal.value = false;
+  modal.value.close();
   clearErrors();
 }
 
@@ -197,7 +196,7 @@ async function submit() {
     }
 
     await loadItens();
-    showModal.value = false;
+    modal.value.close();
   } catch (errResp) {
     if (errResp.status === 422) {
       const payload = errResp.data.error
@@ -216,7 +215,7 @@ function editar(item) {
   editingId.value = item.id;
   form.codigo = item.codigo;
   form.nome = item.nome;
-  showModal.value = true;
+  modal.value.show();
 }
 
 async function excluir(id) {
