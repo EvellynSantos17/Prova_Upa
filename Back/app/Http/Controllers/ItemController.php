@@ -15,54 +15,57 @@ class ItemController extends Controller
         $this->itens = $itens;
     }
 
-   public function store(ItensRequest $request)
-     {
-     try {
-          $validatedData = $request->validated();
+ public function store(ItensRequest $request)
+{
+    try {
+        $validatedData = $request->validated();
+        $quantidadeNova = $request->input('quantidade', 1);
 
-          $itemPorCodigo = $this->itens->where('codigo', $validatedData['codigo'])->first();
-          if ($itemPorCodigo) {
+        $itemPorCodigo = $this->itens->where('codigo', $validatedData['codigo'])->first();
+        if ($itemPorCodigo) {
+            if ($itemPorCodigo->nome === $validatedData['nome']) {
+                return response()->json([
+                    'message' => 'Item já existe com esse nome e código.',
+                    'data' => $itemPorCodigo->load('estoque')
+                ]);
+            }
+            return response()->json([
+                'error' => 'O código já está em uso por outro item.',
+            ], 422);
+        }
 
-               if ($itemPorCodigo->nome === $validatedData['nome']) {
-                    return response()->json([
-                         'message' => 'Item já existe com esse nome e código.',
-                         'data' => $itemPorCodigo->load('estoque')
-                    ]);
-               }
+        $itemPorNome = $this->itens->where('nome', $validatedData['nome'])->first();
 
+        $item = $this->itens->create($validatedData);
 
-               return response()->json([
-                    'error' => 'O código já está em uso por outro item.',
-               ], 422);
-          }
+        $item->estoque()->create(['quantidade' => 0]);
 
+        if ($itemPorNome) {
+            $estoqueExistente = $itemPorNome->estoque()->first();
 
-          $itemPorNome = $this->itens->where('nome', $validatedData['nome'])->first();
-          if ($itemPorNome) {
+            if ($estoqueExistente) {
+                $estoqueExistente->quantidade += $quantidadeNova;
+                $estoqueExistente->save();
+            } else {
+                $itemPorNome->estoque()->create(['quantidade' => $quantidadeNova]);
+            }
+        } else {
+            $estoqueNovoItem = $item->estoque()->first();
+            $estoqueNovoItem->quantidade += $quantidadeNova;
+            $estoqueNovoItem->save();
+        }
 
-               $novoItem = $this->itens->create($validatedData);
-               $novoItem->estoque()->create(['quantidade' => 1]);
+        return response()->json([
+            'message' => 'Item criado e quantidade somada ao estoque do nome correspondente.',
+            'data' => $item->load('estoque')
+        ], 201);
 
-               return response()->json([
-                    'message' => 'Novo item criado com nome já existente. Estoque iniciado com 1.',
-                    'data' => $novoItem->load('estoque')
-               ], 201);
-          }
-
-          $item = $this->itens->create($validatedData);
-          $item->estoque()->create(['quantidade' => 1]);
-
-          return response()->json([
-               'message' => 'Item e estoque criados com sucesso.',
-               'data' => $item->load('estoque')
-          ], 201);
-
-     } catch (\Exception $e) {
-          return response()->json([
-               'error' => 'Erro ao criar item.',
-               'detalhes' => $e->getMessage()
-          ], 500);
-     }
-     }
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Erro ao criar item.',
+            'detalhes' => $e->getMessage()
+        ], 500);
+    }
+}
 
 }
