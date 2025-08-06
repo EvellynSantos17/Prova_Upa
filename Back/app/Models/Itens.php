@@ -11,12 +11,16 @@ class Itens extends Model
 
     protected $table = 'itens';
 
-    protected $fillable = ['nome', 'descricao', 'codigo'];
+    protected $fillable = ['nome', 'descricao', 'codigo', 'setor_id'];
 
     public function estoque()
     {
         return $this->hasOne(Estoque::class, 'item_id');
     }
 
+    public function setore()
+    {
+        return $this->belongsTo(Setor::class, 'setor_id');
+    }
 
 }
