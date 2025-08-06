@@ -1,24 +1,21 @@
 <template>
   <div class="flex min-h-screen">
     <SidebarMenu />
-
-    <div class="flex-1 bg-gray-50 text-gray-900 ml-64">
+    <div class="flex-1 bg-gray-50 text-gray-900">
       <header class="bg-white shadow-md py-4 mb-6">
-        <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+        <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
           <h1 class="text-3xl font-semibold">Cadastro de Itens</h1>
-          <div class="p-6">
-            <button
-              @click="startNew"
-              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md"
-            >
-              Novo item
-            </button>
-          </div>
+          <button
+            @click="startNew"
+            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md"
+          >
+            Novo item
+          </button>
         </div>
       </header>
 
       <main class="max-w-4xl mx-auto px-4 divide-y divide-gray-200">
-        <!-- Modal -->
+        <!-- Modal para cadastro/edição -->
         <Modal ref="modal" @close="cancelar">
           <h2 class="text-2xl font-medium mb-4">
             {{ isEdit ? "Editar Item" : "Novo Item" }}
@@ -55,6 +52,58 @@
               </p>
             </div>
 
+            <div>
+              <label class="block text-sm font-medium mb-1">Descrição</label>
+              <textarea
+                v-model="form.descricao"
+                rows="3"
+                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                placeholder="Descrição opcional"
+              ></textarea>
+              <p v-if="errors.descricao" class="text-red-600 text-sm mt-1">
+                {{ errors.descricao }}
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                Quantidade <span class="text-red-600">*</span>
+              </label>
+              <input
+                v-model.number="form.quantidade"
+                type="number"
+                min="1"
+                required
+                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              />
+              <p v-if="errors.quantidade" class="text-red-600 text-sm mt-1">
+                {{ errors.quantidade }}
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                Setor <span class="text-red-600">*</span>
+              </label>
+              <select
+                v-model="form.setor_id"
+                required
+                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              >
+                <option value="" disabled>Selecione um setor</option>
+                <option
+                  v-for="setor in setores"
+                  :key="setor.id"
+                  :value="setor.id"
+                >
+                  {{ setor.nome }}
+                </option>
+              </select>
+              <p v-if="errors.setor_id" class="text-red-600 text-sm mt-1">
+                {{ errors.setor_id }}
+              </p>
+            </div>
+
             <div class="flex gap-3 justify-end">
               <button
                 type="submit"
@@ -83,6 +132,8 @@
                   <th class="px-4 py-2 text-left">Código</th>
                   <th class="px-4 py-2 text-left">Nome</th>
                   <th class="px-4 py-2 text-left">Qtd. Estoque</th>
+                  <th class="px-4 py-2 text-left">Descrição</th>
+                  <th class="px-4 py-2 text-left">Setor</th>
                   <th class="px-4 py-2">Ações</th>
                 </tr>
               </thead>
@@ -95,23 +146,25 @@
                   <td class="px-4 py-2">{{ item.codigo }}</td>
                   <td class="px-4 py-2">{{ item.nome }}</td>
                   <td class="px-4 py-2">{{ item.estoque?.quantidade ?? 0 }}</td>
+                  <td class="px-4 py-2">{{ item.descricao || "-" }}</td>
+                  <td class="px-4 py-2">{{ item.setor?.nome || "-" }}</td>
                   <td class="px-4 py-2 text-sm text-right">
                     <button
                       @click="editar(item)"
-                      class="text-indigo-600 hover:text-indigo-800 font-medium mr-2"
+                      class="text-indigo-600 hover:text-indigo-800 mr-2"
                     >
                       Editar
                     </button>
                     <button
                       @click="excluir(item.id)"
-                      class="text-red-600 hover:text-red-800 font-medium"
+                      class="text-red-600 hover:text-red-800"
                     >
                       Excluir
                     </button>
                   </td>
                 </tr>
                 <tr v-if="itens.length === 0">
-                  <td colspan="4" class="text-center py-4 text-gray-500">
+                  <td colspan="6" class="text-center py-4 text-gray-500">
                     Nenhum item encontrado.
                   </td>
                 </tr>
@@ -126,44 +179,52 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from "vue";
-import axios from "axios";
 import SidebarMenu from "./components/SidebarMenu.vue";
 import Modal from "./components/Modal.vue";
+import api from "./axios";
 
 const modal = ref(null);
 const itens = ref([]);
+const setores = ref([]);
 const editingId = ref(null);
 
 const form = reactive({
   codigo: "",
   nome: "",
+  descricao: "",
+  quantidade: 1,
+  setor_id: "",
 });
 
 const errors = reactive({});
-
 const isEdit = computed(() => editingId.value !== null);
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_URL || "/api/v1",
-  withCredentials: true,
-});
-
-API.interceptors.response.use(
+// Intercepta erros 422 para exibir no formulário
+api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 422) {
-      throw error.response;
-    }
+    if (error.response?.status === 422) throw error.response;
     return Promise.reject(error);
   }
 );
 
 async function loadItens() {
   try {
-    const { data } = await API.get("/itens");
-    itens.value = data.data;
-  } catch (e) {
-    console.error("Erro ao carregar itens:", e);
+    const { data } = await api.get("/itens");
+    itens.value = data ?? [];
+  } catch (error) {
+    console.error("Erro ao carregar itens:", error);
+    itens.value = [];
+  }
+}
+
+async function loadSetores() {
+  try {
+    const { data } = await api.get("/setores");
+    setores.value = data ?? [];
+  } catch (error) {
+    console.error("Erro ao carregar setores:", error);
+    setores.value = [];
   }
 }
 
@@ -171,6 +232,10 @@ function startNew() {
   editingId.value = null;
   form.codigo = "";
   form.nome = "";
+  form.descricao = "";
+  form.quantidade = 1;
+  form.setor_id = "";
+  clearErrors();
   modal.value.show();
 }
 
@@ -181,31 +246,33 @@ function cancelar() {
 
 async function submit() {
   clearErrors();
+
   try {
     const payload = {
       codigo: form.codigo,
       nome: form.nome,
+      descricao: form.descricao,
+      quantidade: form.quantidade,
+      setor_id: form.setor_id,
     };
 
     if (isEdit.value) {
-      await API.put(`/itens/${editingId.value}`, payload);
+      await api.put(`/itens/${editingId.value}`, payload);
       alert("Item atualizado com sucesso.");
     } else {
-      const resp = await API.post("/create/itens", payload);
-      alert(resp.data.message || "Item salvo com sucesso.");
+      const response = await api.post("/create/itens", payload);
+      alert(response.data.message || "Item salvo com sucesso.");
     }
 
     await loadItens();
     modal.value.close();
-  } catch (errResp) {
-    if (errResp.status === 422) {
-      const payload = errResp.data.error
-        ? { nome: errResp.data.error }
-        : errResp.data.errors || {};
-      for (const key in payload) errors[key] = payload[key][0] || payload[key];
-      alert(errResp.data.error || errResp.data.message || "Dados inválidos.");
+  } catch (error) {
+    console.error("Erro ao salvar item:", error);
+    if (error.status === 422) {
+      const errs = error.data.errors || {};
+      Object.keys(errs).forEach((key) => (errors[key] = errs[key][0]));
+      alert(error.data.message || "Dados inválidos.");
     } else {
-      console.error(errResp);
       alert("Falha ao salvar item.");
     }
   }
@@ -215,24 +282,30 @@ function editar(item) {
   editingId.value = item.id;
   form.codigo = item.codigo;
   form.nome = item.nome;
+  form.descricao = item.descricao ?? "";
+  form.quantidade = item.estoque?.quantidade ?? 1;
+  form.setor_id = item.setor?.id ?? "";
+  clearErrors();
   modal.value.show();
 }
 
 async function excluir(id) {
   if (!confirm("Tem certeza que deseja excluir este item?")) return;
+
   try {
-    await API.delete(`/itens/${id}`);
+    await api.delete(`/itens/${id}`);
     await loadItens();
-  } catch (e) {
-    console.error("Erro ao excluir:", e);
+  } catch (error) {
+    console.error("Erro ao excluir item:", error);
   }
 }
 
 function clearErrors() {
-  for (const key in errors) {
-    errors[key] = "";
-  }
+  Object.keys(errors).forEach((key) => (errors[key] = ""));
 }
 
-onMounted(loadItens);
+onMounted(() => {
+  loadItens();
+  loadSetores();
+});
 </script>
