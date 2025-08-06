@@ -19,4 +19,9 @@ class Setor extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function itens()
+    {
+        return $this->hasMany(Itens::class, 'setor_id');
+    }
 }
