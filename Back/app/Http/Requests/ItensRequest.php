@@ -24,7 +24,11 @@ class ItensRequest extends FormRequest
         return [
             'nome' => 'required|string|max:255',
             'descricao' => 'nullable|string|max:1000',
-            'codigo' => 'required|string|max:50|unique:itens,codigo',
+            'codigo' => 'required|string|max:50',
+            'quantidade' => 'required|integer|min:1',
+            'setor_id' => 'required|exists:setores,id',
+
         ];
     }
+
 }
