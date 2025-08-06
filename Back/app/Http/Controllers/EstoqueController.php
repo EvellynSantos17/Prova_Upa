@@ -16,26 +16,21 @@ class EstoqueController extends Controller
 
     public function index()
     {
+
         $estoques = Estoque::with('item:id,nome,descricao,codigo')->get();
 
-        $estoquesAgrupados = $estoques->groupBy(function ($estoque) {
-            return $estoque->item->nome ?? 'Sem Nome';
-        })->map(function ($grupo, $nome) {
-            $quantidadeTotal = $grupo->sum('quantidade');
-            $item = $grupo->first()->item;
-
+        $response = $estoques->map(function ($estoque) {
             return [
-                'nome'       => $nome,
-                'descricao'  => $item->descricao ?? null,
-                'codigo'     => $item->codigo ?? null,
+                'nome'       => $estoque->item->nome ?? null,
+                'descricao'  => $estoque->item->descricao ?? null,
+                'codigo'     => $estoque->item->codigo ?? null,
                 'estoque'    => [
-                    'quantidade' => $quantidadeTotal,
+                    'quantidade' => $estoque->quantidade,
                 ],
-                'id' => $grupo->first()->id,
+                'id' => $estoque->id,
             ];
-        })->values();
+        });
 
-        return response()->json($estoquesAgrupados);
+        return response()->json($response);
     }
-
 }
