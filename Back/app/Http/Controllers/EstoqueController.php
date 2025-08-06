@@ -14,11 +14,15 @@ class EstoqueController extends Controller
         $this->estoque = $estoque;
     }
 
-    public function index()
+   public function index()
     {
-
-        $estoques = Estoque::with('item:id,nome,descricao,codigo')->get();
-
+        $estoques = Estoque::with('item:id,nome,descricao,codigo')
+            ->where('quantidade', '>', 0)
+            ->get()
+            ->unique(function ($estoque) {
+                return $estoque->item->nome ?? null;
+            });
+        
         $response = $estoques->map(function ($estoque) {
             return [
                 'nome'       => $estoque->item->nome ?? null,
@@ -30,7 +34,8 @@ class EstoqueController extends Controller
                 'id' => $estoque->id,
             ];
         });
-
-        return response()->json($response);
+    
+        return response()->json($response->values());
     }
+
 }
