@@ -16,7 +16,11 @@ return new class extends Migration
             $table->string('nome');
             $table->text('descricao')->nullable();
             $table->string('codigo')->unique();
+            $table->foreignId('setor_id')
+                    ->nullable()
+                    ->constrained('setores');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
