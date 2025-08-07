@@ -24,4 +24,6 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/create/itens', [ItemController::class, 'store']);
     Route::get('/itens', [EstoqueController::class, 'index']);
+    Route::get('/itens-all', [EstoqueController::class, 'lista']);
+    Route::delete('/itens/{id}', [EstoqueController::class,'destroy']);
 });
