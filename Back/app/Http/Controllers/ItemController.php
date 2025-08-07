@@ -56,7 +56,7 @@ class ItemController extends Controller
         }
 
         return response()->json([
-            'message' => 'Item criado e quantidade somada ao estoque do nome correspondente.',
+            'message' => 'Item criado.',
             'data' => $item->load('estoque')
         ], 201);
 
