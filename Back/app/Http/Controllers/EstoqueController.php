@@ -22,7 +22,7 @@ class EstoqueController extends Controller
             ->unique(function ($estoque) {
                 return $estoque->item->nome ?? null;
             });
-        
+
         $response = $estoques->map(function ($estoque) {
             return [
                 'nome'       => $estoque->item->nome ?? null,
@@ -34,8 +34,27 @@ class EstoqueController extends Controller
                 'id' => $estoque->id,
             ];
         });
-    
+
         return response()->json($response->values());
     }
 
+    public function lista()
+    {
+        $estoques = Estoque::with('item:id,nome,descricao,codigo')
+            ->get();
+
+        $response = $estoques->map(function ($estoque) {
+            return [
+                'nome'       => $estoque->item->nome ?? null,
+                'descricao'  => $estoque->item->descricao ?? null,
+                'codigo'     => $estoque->item->codigo ?? null,
+                'estoque'    => [
+                    'quantidade' => $estoque->quantidade,
+                ],
+                'id' => $estoque->id,
+            ];
+        });
+
+        return response()->json($response->values());
+    }
 }
