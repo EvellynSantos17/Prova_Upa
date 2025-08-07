@@ -15,22 +15,17 @@
       </header>
 
       <main class="max-w-4xl mx-auto px-4 divide-y divide-gray-200">
-        <!-- Modal para cadastro/edição -->
+        <!-- Modal de Cadastro -->
         <Modal ref="modal" @close="cancelar">
-          <h2 class="text-2xl font-medium mb-4">
-            {{ isEdit ? "Editar Item" : "Novo Item" }}
-          </h2>
+          <h2 class="text-2xl font-medium mb-4">Novo Item</h2>
           <form @submit.prevent="submit" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium mb-1">
-                Código <span class="text-red-600">*</span>
-              </label>
+              <label class="block text-sm font-medium mb-1">Código *</label>
               <input
                 v-model="form.codigo"
-                :disabled="isEdit"
                 type="text"
                 required
-                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                class="shadow-sm block w-full border-gray-300 rounded-md p-2"
               />
               <p v-if="errors.codigo" class="text-red-600 text-sm mt-1">
                 {{ errors.codigo }}
@@ -38,14 +33,12 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-1">
-                Nome <span class="text-red-600">*</span>
-              </label>
+              <label class="block text-sm font-medium mb-1">Nome *</label>
               <input
                 v-model="form.nome"
                 type="text"
                 required
-                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                class="shadow-sm block w-full border-gray-300 rounded-md p-2"
               />
               <p v-if="errors.nome" class="text-red-600 text-sm mt-1">
                 {{ errors.nome }}
@@ -57,8 +50,7 @@
               <textarea
                 v-model="form.descricao"
                 rows="3"
-                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                placeholder="Descrição opcional"
+                class="shadow-sm block w-full border-gray-300 rounded-md p-2"
               ></textarea>
               <p v-if="errors.descricao" class="text-red-600 text-sm mt-1">
                 {{ errors.descricao }}
@@ -66,29 +58,11 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-1">
-                Quantidade <span class="text-red-600">*</span>
-              </label>
-              <input
-                v-model.number="form.quantidade"
-                type="number"
-                min="1"
-                required
-                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              />
-              <p v-if="errors.quantidade" class="text-red-600 text-sm mt-1">
-                {{ errors.quantidade }}
-              </p>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium mb-1">
-                Setor <span class="text-red-600">*</span>
-              </label>
+              <label class="block text-sm font-medium mb-1">Setor *</label>
               <select
                 v-model="form.setor_id"
                 required
-                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                class="shadow-sm block w-full border-gray-300 rounded-md p-2"
               >
                 <option value="" disabled>Selecione um setor</option>
                 <option
@@ -109,7 +83,7 @@
                 type="submit"
                 class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md"
               >
-                {{ isEdit ? "Atualizar" : "Salvar" }}
+                Salvar
               </button>
               <button
                 type="button"
@@ -120,6 +94,46 @@
               </button>
             </div>
           </form>
+        </Modal>
+
+        <!-- Modal de Exclusão -->
+        <Modal ref="deleteModal" @close="cancelarExclusao">
+          <h2 class="text-xl font-semibold mb-4">Excluir Itens</h2>
+          <p class="mb-4">Selecione os itens que deseja excluir:</p>
+          <div class="max-h-64 overflow-y-auto mb-6">
+            <div
+              v-for="item in itensParaExclusao"
+              :key="item.id"
+              class="flex items-center mb-2"
+            >
+              <input
+                type="checkbox"
+                :id="`item-${item.id}`"
+                :value="item.id"
+                v-model="selecionados"
+                class="mr-2"
+              />
+              <label :for="`item-${item.id}`">
+                <span class="font-medium">{{ item.nome }}</span>
+                <small class="text-gray-500 ml-2">({{ item.codigo }})</small>
+              </label>
+            </div>
+          </div>
+          <div class="flex justify-end gap-3">
+            <button
+              @click="confirmarExclusao"
+              :disabled="selecionados.length === 0"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
+            >
+              Excluir Selecionados
+            </button>
+            <button
+              @click="cancelarExclusao"
+              class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md"
+            >
+              Cancelar
+            </button>
+          </div>
         </Modal>
 
         <!-- Lista de Itens -->
@@ -134,7 +148,7 @@
                   <th class="px-4 py-2 text-left">Qtd. Estoque</th>
                   <th class="px-4 py-2 text-left">Descrição</th>
                   <th class="px-4 py-2 text-left">Setor</th>
-                  <th class="px-4 py-2">Ações</th>
+                  <th class="px-4 py-2 text-left">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -150,13 +164,7 @@
                   <td class="px-4 py-2">{{ item.setor?.nome || "-" }}</td>
                   <td class="px-4 py-2 text-sm text-right">
                     <button
-                      @click="editar(item)"
-                      class="text-indigo-600 hover:text-indigo-800 mr-2"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      @click="excluir(item.id)"
+                      @click="abrirModalExcluir"
                       class="text-red-600 hover:text-red-800"
                     >
                       Excluir
@@ -178,28 +186,29 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import SidebarMenu from "./components/SidebarMenu.vue";
 import Modal from "./components/Modal.vue";
 import api from "./axios";
 
 const modal = ref(null);
-const itens = ref([]);
+const deleteModal = ref(null);
+
+const itens = ref([]); // Usado na tabela principal
+const itensParaExclusao = ref([]); // Usado no modal de exclusão
 const setores = ref([]);
-const editingId = ref(null);
+const selecionados = ref([]);
 
 const form = reactive({
   codigo: "",
   nome: "",
   descricao: "",
-  quantidade: 1,
   setor_id: "",
 });
 
 const errors = reactive({});
-const isEdit = computed(() => editingId.value !== null);
 
-// Intercepta erros 422 para exibir no formulário
+// Intercepta erros 422
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -212,8 +221,7 @@ async function loadItens() {
   try {
     const { data } = await api.get("/itens");
     itens.value = data ?? [];
-  } catch (error) {
-    console.error("Erro ao carregar itens:", error);
+  } catch {
     itens.value = [];
   }
 }
@@ -222,18 +230,15 @@ async function loadSetores() {
   try {
     const { data } = await api.get("/setores");
     setores.value = data ?? [];
-  } catch (error) {
-    console.error("Erro ao carregar setores:", error);
+  } catch {
     setores.value = [];
   }
 }
 
 function startNew() {
-  editingId.value = null;
   form.codigo = "";
   form.nome = "";
   form.descricao = "";
-  form.quantidade = 1;
   form.setor_id = "";
   clearErrors();
   modal.value.show();
@@ -246,57 +251,49 @@ function cancelar() {
 
 async function submit() {
   clearErrors();
-
   try {
-    const payload = {
+    await api.post("/create/itens", {
       codigo: form.codigo,
       nome: form.nome,
       descricao: form.descricao,
-      quantidade: form.quantidade,
+      quantidade: 1,
       setor_id: form.setor_id,
-    };
-
-    if (isEdit.value) {
-      await api.put(`/itens/${editingId.value}`, payload);
-      alert("Item atualizado com sucesso.");
-    } else {
-      const response = await api.post("/create/itens", payload);
-      alert(response.data.message || "Item salvo com sucesso.");
-    }
-
+    });
     await loadItens();
     modal.value.close();
   } catch (error) {
-    console.error("Erro ao salvar item:", error);
     if (error.status === 422) {
       const errs = error.data.errors || {};
-      Object.keys(errs).forEach((key) => (errors[key] = errs[key][0]));
-      alert(error.data.message || "Dados inválidos.");
-    } else {
-      alert("Falha ao salvar item.");
+      Object.entries(errs).forEach(([k, v]) => (errors[k] = v[0]));
     }
   }
 }
 
-function editar(item) {
-  editingId.value = item.id;
-  form.codigo = item.codigo;
-  form.nome = item.nome;
-  form.descricao = item.descricao ?? "";
-  form.quantidade = item.estoque?.quantidade ?? 1;
-  form.setor_id = item.setor?.id ?? "";
-  clearErrors();
-  modal.value.show();
+async function abrirModalExcluir() {
+  selecionados.value = [];
+  try {
+    const { data } = await api.get("/itens-all");
+    itensParaExclusao.value = data ?? [];
+    deleteModal.value.show();
+  } catch {
+    alert("Erro ao carregar itens para exclusão.");
+  }
 }
 
-async function excluir(id) {
-  if (!confirm("Tem certeza que deseja excluir este item?")) return;
+function cancelarExclusao() {
+  deleteModal.value.close();
+}
 
+async function confirmarExclusao() {
+  if (selecionados.value.length === 0) return;
   try {
-    await api.delete(`/itens/${id}`);
+    await Promise.all(
+      selecionados.value.map((id) => api.delete(`/itens/${id}`))
+    );
     await loadItens();
-  } catch (error) {
-    console.error("Erro ao excluir item:", error);
+    deleteModal.value.close();
+  } catch {
+    alert("Erro ao excluir itens.");
   }
 }
 
