@@ -21,7 +21,7 @@ class EstoqueController extends Controller
      * Método para listar todos os itens em estoque
      * @return \Illuminate\Http\JsonResponse
      */
-   public function index()
+    public function index()
     {
         $estoques = Estoque::with('item:id,nome,descricao,codigo')
             ->where('quantidade', '>', 0)
@@ -50,43 +50,40 @@ class EstoqueController extends Controller
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
-  public function destroy($id)
-{
-    $item = $this->item->find($id);
+    public function destroy($id)
+    {
+        $item = $this->item->find($id);
 
-    if (!$item) {
-        return response()->json(['error' => 'Item não encontrado'], 404);
+        if (!$item) {
+            return response()->json(['error' => 'Item não encontrado'], 404);
+        }
+
+        $itensComMesmoNome = $this->item->where('nome', $item->nome)->get();
+
+        if ($itensComMesmoNome->isEmpty()) {
+            return response()->json(['error' => 'Nenhum outro item com mesmo nome encontrado'], 404);
+        }
+
+        $estoques = Estoque::whereIn('item_id', $itensComMesmoNome->pluck('id'))->get();
+
+        if ($estoques->isEmpty()) {
+            return response()->json(['error' => 'Nenhum estoque encontrado para os itens com mesmo nome'], 404);
+        }
+
+        $estoqueParaAlterar = $estoques->sortByDesc('quantidade')->first();
+
+        if ($estoqueParaAlterar->quantidade > 0) {
+            $estoqueParaAlterar->quantidade -= 1;
+            $estoqueParaAlterar->save();
+        }
+
+        if ($estoqueParaAlterar->quantidade <= 0) {
+            $estoqueParaAlterar->delete();
+        }
+
+        $item->delete();
+
+        return response()->json(['message' => 'Item deletado e estoque atualizado com sucesso.']);
     }
-
-    $itensComMesmoNome = $this->item->where('nome', $item->nome)->get();
-
-    if ($itensComMesmoNome->isEmpty()) {
-        return response()->json(['error' => 'Nenhum outro item com mesmo nome encontrado'], 404);
-    }
-
-    $estoques = Estoque::whereIn('item_id', $itensComMesmoNome->pluck('id'))->get();
-
-    if ($estoques->isEmpty()) {
-        return response()->json(['error' => 'Nenhum estoque encontrado para os itens com mesmo nome'], 404);
-    }
-
-    $estoqueParaAlterar = $estoques->sortByDesc('quantidade')->first();
-
-    if ($estoqueParaAlterar->quantidade > 0) {
-        $estoqueParaAlterar->quantidade -= 1;
-        $estoqueParaAlterar->save();
-    }
-
-    if ($estoqueParaAlterar->quantidade <= 0) {
-        $estoqueParaAlterar->delete();
-    }
-
-    $item->delete();
-
-    return response()->json(['message' => 'Item deletado e estoque atualizado com sucesso.']);
-}
-
-
-
 
 }
