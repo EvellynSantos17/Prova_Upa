@@ -7,7 +7,7 @@
     <div class="flex-1 p-10 overflow-y-auto">
       <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
         <h2 class="text-2xl font-bold mb-6 text-center">
-          Retirada de Equipamento
+          Devolução de Equipamento
         </h2>
 
         <form @submit.prevent="submitForm" class="space-y-4">
@@ -28,7 +28,7 @@
           <!-- Motivo -->
           <div>
             <label for="motivo" class="block font-medium text-gray-700">
-              Motivo da Retirada:
+              Motivo da Devolução:
             </label>
             <textarea
               v-model="form.descricao"
