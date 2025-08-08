@@ -14,6 +14,11 @@ class MovimentacaoController extends Controller
     protected $movimentacao;
     protected $item;
 
+    /**
+     * MovimentacaoController constructor.
+     * @param Movimentacao $movimentacao
+     * @param Itens $item
+     */
     public function __construct(Movimentacao $movimentacao, Itens $item)
     {
         $this->movimentacao = $movimentacao;
@@ -21,6 +26,10 @@ class MovimentacaoController extends Controller
     }
 
 
+    /**
+     * Método para listar todas as movimentações
+     * @return \Illuminate\Http\JsonResponse
+     */
    public function store(Request $request)
     {
         $validated = $request->validate([
