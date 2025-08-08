@@ -13,6 +13,7 @@
         >
           <div
             class="flex items-center justify-between cursor-pointer p-2 rounded hover:bg-gray-700"
+            @click="navigateTo(item)"
           >
             <div class="flex items-center gap-2">
               <span class="text-lg">{{ item.icon }}</span>
@@ -36,6 +37,7 @@
             </svg>
           </div>
 
+          <!-- SUBMENU -->
           <ul
             v-if="item.submenu && hoveredIndex === index"
             class="ml-6 mt-1 space-y-1"
@@ -44,8 +46,9 @@
               v-for="(sub, subIndex) in item.submenu"
               :key="subIndex"
               class="p-1 pl-3 hover:bg-gray-700 rounded cursor-pointer"
+              @click="navigateTo(sub)"
             >
-              {{ sub }}
+              {{ sub.label }}
             </li>
           </ul>
         </li>
@@ -73,17 +76,28 @@ const menuItems = [
   {
     label: "Início",
     icon: "🏠",
+    route: "/home",
   },
   {
     label: "Retirada",
     icon: "📦",
-    submenu: ["Avisar que retirou", "Devolver"],
+    submenu: [
+      { label: "Retirou", route: "/retirada" },
+      { label: "Devolver", route: "/retirada" },
+    ],
   },
   {
     label: "Inventário",
     icon: "📋",
+    route: "/inventario",
   },
 ];
+
+function navigateTo(item) {
+  if (item.route) {
+    router.push(item.route);
+  }
+}
 
 function logout() {
   localStorage.clear();
