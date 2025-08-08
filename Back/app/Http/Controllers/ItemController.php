@@ -67,6 +67,7 @@ class ItemController extends Controller
             ], 500);
         }
     }
+
     public function lista()
     {
         try {
@@ -126,5 +127,4 @@ class ItemController extends Controller
 
         return response()->json($item);
     }
-
 }
