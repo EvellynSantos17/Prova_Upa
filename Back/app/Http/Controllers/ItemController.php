@@ -15,6 +15,11 @@ class ItemController extends Controller
         $this->itens = $itens;
     }
 
+    /**
+     * Método para criar um novo item
+     * @param ItensRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(ItensRequest $request)
     {
         try {
@@ -68,6 +73,9 @@ class ItemController extends Controller
         }
     }
 
+    /* Método para listar todos os itens
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function lista()
     {
         try {
@@ -82,6 +90,11 @@ class ItemController extends Controller
         }
     }
 
+    /* Método para atualizar um item
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, $id)
     {
         try {
