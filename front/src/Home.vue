@@ -96,46 +96,6 @@
           </form>
         </Modal>
 
-        <!-- Modal de Exclusão -->
-        <Modal ref="deleteModal" @close="cancelarExclusao">
-          <h2 class="text-xl font-semibold mb-4">Excluir Itens</h2>
-          <p class="mb-4">Selecione os itens que deseja excluir:</p>
-          <div class="max-h-64 overflow-y-auto mb-6">
-            <div
-              v-for="item in itensParaExclusao"
-              :key="item.id"
-              class="flex items-center mb-2"
-            >
-              <input
-                type="checkbox"
-                :id="`item-${item.id}`"
-                :value="item.id"
-                v-model="selecionados"
-                class="mr-2"
-              />
-              <label :for="`item-${item.id}`">
-                <span class="font-medium">{{ item.nome }}</span>
-                <small class="text-gray-500 ml-2">({{ item.codigo }})</small>
-              </label>
-            </div>
-          </div>
-          <div class="flex justify-end gap-3">
-            <button
-              @click="confirmarExclusao"
-              :disabled="selecionados.length === 0"
-              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
-            >
-              Excluir Selecionados
-            </button>
-            <button
-              @click="cancelarExclusao"
-              class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md"
-            >
-              Cancelar
-            </button>
-          </div>
-        </Modal>
-
         <!-- Lista de Itens -->
         <section class="py-6">
           <h2 class="text-2xl font-medium mb-4">Itens Cadastrados</h2>
@@ -147,8 +107,6 @@
                   <th class="px-4 py-2 text-left">Nome</th>
                   <th class="px-4 py-2 text-left">Qtd. Estoque</th>
                   <th class="px-4 py-2 text-left">Descrição</th>
-                  <th class="px-4 py-2 text-left">Setor</th>
-                  <th class="px-4 py-2 text-left">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -161,18 +119,9 @@
                   <td class="px-4 py-2">{{ item.nome }}</td>
                   <td class="px-4 py-2">{{ item.estoque?.quantidade ?? 0 }}</td>
                   <td class="px-4 py-2">{{ item.descricao || "-" }}</td>
-                  <td class="px-4 py-2">{{ item.setor?.nome || "-" }}</td>
-                  <td class="px-4 py-2 text-sm text-right">
-                    <button
-                      @click="abrirModalExcluir"
-                      class="text-red-600 hover:text-red-800"
-                    >
-                      Excluir
-                    </button>
-                  </td>
                 </tr>
                 <tr v-if="itens.length === 0">
-                  <td colspan="6" class="text-center py-4 text-gray-500">
+                  <td colspan="5" class="text-center py-4 text-gray-500">
                     Nenhum item encontrado.
                   </td>
                 </tr>
@@ -192,12 +141,9 @@ import Modal from "./components/Modal.vue";
 import api from "./axios";
 
 const modal = ref(null);
-const deleteModal = ref(null);
 
 const itens = ref([]); // Usado na tabela principal
-const itensParaExclusao = ref([]); // Usado no modal de exclusão
 const setores = ref([]);
-const selecionados = ref([]);
 
 const form = reactive({
   codigo: "",
@@ -266,34 +212,6 @@ async function submit() {
       const errs = error.data.errors || {};
       Object.entries(errs).forEach(([k, v]) => (errors[k] = v[0]));
     }
-  }
-}
-
-async function abrirModalExcluir() {
-  selecionados.value = [];
-  try {
-    const { data } = await api.get("/itens-all");
-    itensParaExclusao.value = data ?? [];
-    deleteModal.value.show();
-  } catch {
-    alert("Erro ao carregar itens para exclusão.");
-  }
-}
-
-function cancelarExclusao() {
-  deleteModal.value.close();
-}
-
-async function confirmarExclusao() {
-  if (selecionados.value.length === 0) return;
-  try {
-    await Promise.all(
-      selecionados.value.map((id) => api.delete(`/itens/${id}`))
-    );
-    await loadItens();
-    deleteModal.value.close();
-  } catch {
-    alert("Erro ao excluir itens.");
   }
 }
 
