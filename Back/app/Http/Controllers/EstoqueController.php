@@ -17,6 +17,10 @@ class EstoqueController extends Controller
         $this->item = $item;
     }
 
+    /**
+     * Método para listar todos os itens em estoque
+     * @return \Illuminate\Http\JsonResponse
+     */
    public function index()
     {
         $estoques = Estoque::with('item:id,nome,descricao,codigo')
@@ -41,8 +45,11 @@ class EstoqueController extends Controller
         return response()->json($response->values());
     }
 
-   
 
+    /** Método para deletar um item
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
   public function destroy($id)
 {
     $item = $this->item->find($id);
