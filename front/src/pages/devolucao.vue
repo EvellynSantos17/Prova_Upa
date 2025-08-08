@@ -70,7 +70,7 @@ const submitForm = async () => {
 
     await api.post("/movimentacao", {
       item_id: item.id,
-      tipo: "retirada",
+      tipo: "devolucao",
       motivo_retirada: form.descricao,
     });
 

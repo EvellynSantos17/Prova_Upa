@@ -6,6 +6,7 @@ import Cadastro from "../Cadastro.vue";
 import Home from "../Home.vue";
 import InventarioView from "../pages/inventarioView.vue";
 import Retirada from "../pages/retirada.vue";
+import Devolucao from "../pages/devolucao.vue";
 
 const routes = [
   { path: "/", name: "Welcome", component: Welcome },
@@ -13,6 +14,7 @@ const routes = [
   { path: "/cadastro", name: "Cadastro", component: Cadastro },
   { path: "/home", name: "Home", component: Home },
   { path: "/retirada", name: "Retirada", component: Retirada },
+  { path: "/devolucao", name: "Devolucao", component: Devolucao },
   { path: "/inventario", name: "Inventario", component: InventarioView },
 ];
 

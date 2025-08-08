@@ -116,4 +116,15 @@ class ItemController extends Controller
         }
     }
 
+    public function getItemPorCodigo($codigo)
+    {
+        $item = $this->itens->where('codigo', $codigo)->first();
+
+        if (!$item) {
+            return response()->json(['message' => 'Item não encontrado'], 404);
+        }
+
+        return response()->json($item);
+    }
+
 }

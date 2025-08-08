@@ -25,4 +25,8 @@ class Itens extends Model
         return $this->belongsTo(Setor::class, 'setor_id');
     }
 
+    public function movimentacoes()
+    {
+        return $this->hasMany(Movimentacao::class);
+    }
 }

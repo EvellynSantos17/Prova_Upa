@@ -4,6 +4,7 @@ use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\EstoqueController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\SetorController;
 use Illuminate\Routing\Router;
 
@@ -26,4 +27,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/itens-all', [ItemController::class, 'lista']);
     Route::get('/itens', [EstoqueController::class, 'index']);
     Route::delete('/estoques/{id}', [EstoqueController::class, 'destroy']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/movimentacao', [MovimentacaoController::class, 'store']);
+    });
+    Route::get('/itens/codigo/{codigo}', [ItemController::class, 'getItemPorCodigo']);
+
 });

@@ -83,7 +83,7 @@ const menuItems = [
     icon: "📦",
     submenu: [
       { label: "Retirou", route: "/retirada" },
-      { label: "Devolver", route: "/retirada" },
+      { label: "Devolver", route: "/devolucao" },
     ],
   },
   {

@@ -73,4 +73,8 @@ class User extends Authenticatable
         return $this->belongsTo(Setor::class);
     }
 
+    public function movimentacoes()
+    {
+        return $this->hasMany(Movimentacao::class);
+    }
 }
